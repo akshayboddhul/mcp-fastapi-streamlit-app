@@ -22,6 +22,44 @@ with st.form("add_item_form"):
         else:
             st.error(f"Error adding item: {response.json()['detail']}")
 
+# Get item by ID
+st.header("Get Item by ID")
+with st.form("get_item_form"):
+    item_id = st.number_input("Item ID", min_value=1, step=1)
+    get_submitted = st.form_submit_button("Get Item")
+
+    if get_submitted:
+        try:
+            response = requests.get(f"{API_URL}/items/{item_id}")
+            if response.status_code == 200:
+                item_data = response.json()
+                st.write("Item Details:")
+                st.json(item_data)
+            else:
+                st.error(f"Error retrieving item: {response.json()['detail']}")
+        except requests.exceptions.ConnectionError:
+            st.warning(
+                "Could not connect to the FastAPI backend. Please ensure it's running."
+            )
+
+# Delete item by ID
+st.header("Delete Item by ID")
+with st.form("delete_item_form"):
+    delete_item_id = st.number_input("Item ID to Delete", min_value=1, step=1)
+    delete_submitted = st.form_submit_button("Delete Item")
+
+    if delete_submitted:
+        try:
+            response = requests.delete(f"{API_URL}/items/{delete_item_id}")
+            if response.status_code == 200:
+                st.success(f"Item with ID {delete_item_id} deleted successfully!")
+            else:
+                st.error(f"Error deleting item: {response.json()['detail']}")
+        except requests.exceptions.ConnectionError:
+            st.warning(
+                "Could not connect to the FastAPI backend. Please ensure it's running."
+            )
+
 # Display the current inventory
 st.header("Current Inventory")
 if st.button("Refresh Inventory"):
@@ -34,4 +72,6 @@ if st.button("Refresh Inventory"):
         else:
             st.info("No items in the inventory yet.")
     except requests.exceptions.ConnectionError:
-        st.warning("Could not connect to the FastAPI backend. Please ensure it's running.")
+        st.warning(
+            "Could not connect to the FastAPI backend. Please ensure it's running."
+        )
